@@ -18,10 +18,14 @@ from knowledge_manager import KnowledgeManager
 from researcher import WebResearcher
 
 app = Flask(__name__)
-app.secret_key = "mazeo_ultra_secure_key_2025"
+app.secret_key = os.environ.get("SECRET_KEY", "mazeo_ultra_secure_default_2025")
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=30)
+# For Vercel, we expose 'app' as 'handler' if needed, but 'app' is standard
+app = app 
+
 
 # --- Database Setup (SQLite for Users & Global Knowledge) ---
-DB_PATH = "mazeo_system.db"
+DB_PATH = "/tmp/mazeo_system.db" if os.environ.get("VERCEL") else "mazeo_system.db"
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -550,16 +554,24 @@ def login():
     conn.close()
     
     if user:
+        session.permanent = True
         session['user_id'] = user[0]
         session['username'] = user[1]
         return jsonify({'success': True, 'user': {'id': user[0], 'username': user[1]}})
     return jsonify({'success': False, 'message': 'Invalid credentials.'})
 
+@app.route('/api/check_auth')
+def check_auth():
+    if 'user_id' in session:
+        return jsonify({
+            'authenticated': True, 
+            'user': {'id': session['user_id'], 'username': session['username']}
+        })
+    return jsonify({'authenticated': False})
+
 @app.route('/api/google-login', methods=['POST'])
 def google_login():
     data = request.json
-    # In a real production app, we would verify the token here using 'google-auth'
-    # But for this environment, we will process the credential provided by the frontend
     email = data.get('email')
     username = data.get('name')
     
@@ -569,16 +581,23 @@ def google_login():
     user = cursor.fetchone()
     
     if not user:
-        # Auto-create account for new Google users
         cursor.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", 
                        (username.replace(" ", "_").lower(), email, "GOOGLE_AUTH_ACCOUNT"))
         conn.commit()
         cursor.execute("SELECT id, username FROM users WHERE email=?", (email,))
         user = cursor.fetchone()
     
+    session.permanent = True
     session['user_id'] = user[0]
     session['username'] = user[1]
     conn.close()
+    
+    return jsonify({'success': True, 'user': {'id': user[0], 'username': user[1]}})
+
+@app.route('/api/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
     
     return jsonify({'success': True, 'user': {'id': user[0], 'username': user[1]}})
 

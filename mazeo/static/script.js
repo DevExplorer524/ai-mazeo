@@ -174,3 +174,15 @@ async function installPWA() {
         deferredPrompt = null;
     }
 }
+// --- INITIALIZATION ---
+window.addEventListener('load', async () => {
+    try {
+        const res = await fetch('/api/check_auth');
+        const data = await res.json();
+        if (data.authenticated) {
+            completeAuth(data.user);
+        }
+    } catch (e) {
+        console.log("Auth sync skipped.");
+    }
+});

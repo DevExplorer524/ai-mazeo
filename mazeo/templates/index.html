@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mazeo OS | Autonomous Neural Network</title>
+
+    <!-- PWA / Mobile App -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#020617">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Design System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons & Deps -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <!-- REAL AUTH ENGINE -->
+    <div id="auth-overlay" class="auth-page">
+        <div class="auth-card" id="login-form-container">
+            <div class="logo-section" style="justify-content: center;">
+                <img src="/static/logo.png" alt="Mazeo Logo"
+                    style="width: 60px; height: 60px; border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="font-weight: 800; font-size: 28px;">Mazeo</h2>
+            </div>
+            <h1>Neural Recall</h1>
+            <p>Access your decentralized intelligence core.</p>
+
+            <form id="login-form">
+                <input type="text" id="login-username" class="input-field" placeholder="Username" required>
+                <input type="password" id="login-password" class="input-field" placeholder="Password" required>
+                <button type="submit" class="btn-primary">Initiate Authorization</button>
+            </form>
+
+            <!-- Real Google Login Button -->
+            <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"
+                data-text="signin_with" data-size="large" data-logo_alignment="left"
+                style="margin-top:20px; width:100%;">
+            </div>
+
+            <p style="margin-top: 25px; text-align: center; font-size: 14px;">
+                New operative? <a href="#" onclick="switchAuth('signup')"
+                    style="color: var(--primary); text-decoration: none; font-weight: 600;">Initialize Identity</a>
+            </p>
+        </div>
+
+        <div class="auth-card" id="signup-form-container" style="display: none;">
+            <div class="logo-section" style="justify-content: center;">
+                <img src="/static/logo.png" alt="Mazeo Logo"
+                    style="width: 60px; height: 60px; border-radius: 12px; margin-bottom: 20px;">
+                <h2 style="font-weight: 800; font-size: 28px;">Mazeo</h2>
+            </div>
+            <h1>New Connection</h1>
+            <p>Register your presence in the global network.</p>
+
+            <form id="signup-form">
+                <input type="text" id="signup-username" class="input-field" placeholder="Username" required>
+                <input type="email" id="signup-email" class="input-field" placeholder="Email" required>
+                <input type="password" id="signup-password" class="input-field" placeholder="Password" required>
+                <button type="submit" class="btn-primary">Confirm Identity</button>
+            </form>
+
+            <p style="margin-top: 25px; text-align: center; font-size: 14px;">
+                Already verified? <a href="#" onclick="switchAuth('login')"
+                    style="color: var(--primary); text-decoration: none; font-weight: 600;">Recall Access</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- MAIN APP SHELL -->
+    <div class="app-shell">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <img src="/static/logo.png" alt="Mazeo Logo" style="width: 40px; height: 40px; border-radius: 10px;">
+                <span style="font-weight: 800; font-size: 22px;">Mazeo</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active">
+                    <ion-icon name="chatbubbles" class="icon"></ion-icon>
+                    <span>Intelligence Hub</span>
+                </a>
+            </nav>
+
+            <div class="global-brain-status">
+                <div class="status-dot"></div>
+                <div class="status-label">
+                    <span>Autonomous Link: <strong>Stable</strong></span><br>
+                    <span style="opacity: 0.6; font-size: 9px; text-transform: none;">Global learning active</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Workstation -->
+        <main class="workstation">
+            <header class="top-header">
+                <h3 id="section-title">INTELLIGENCE HUB</h3>
+                <div class="user-tag" id="user-display" style="display: none;">
+                    <div class="tag-avatar" id="user-avatar-char">U</div>
+                    <span id="username-display" style="font-weight: 600; font-size: 14px;">Operative</span>
+                    <button onclick="logout()" style="background:none; border:none; cursor:pointer;"><ion-icon
+                            name="log-out-outline" style="color:red;"></ion-icon></button>
+                </div>
+            </header>
+
+            <div id="chat-viewport" class="chat-viewport">
+                <div class="msg ai">
+                    <div class="tag-avatar">M</div>
+                    <div class="bubble">
+                        **Connection established.** I am Mazeo v2.5.
+                        My knowledge base now learns autonomously from every search query you and other operatives
+                        perform globally.
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-bar">
+                <div id="processing-msg"
+                    style="display: none; font-size: 11px; color: var(--accent); margin-bottom: 8px; font-weight: 600;">
+                    <ion-icon name="infinite-outline" style="vertical-align: middle;"></ion-icon> SYNCING GLOBAL
+                    BRAIN...
+                </div>
+                <form id="main-chat-form" class="input-wrapper">
+                    <input type="text" id="user-query" placeholder="Submit query to neural core..." autocomplete="off">
+                    <button type="submit" class="btn-send">
+                        <ion-icon name="arrow-up-outline" style="font-size: 20px;"></ion-icon>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- PWA Install Banner -->
+    <div id="mobile-install-banner"
+        style="display: none; position: fixed; bottom: 85px; left: 20px; right: 20px; background: var(--grad-blue); padding: 20px; border-radius: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 500; border: 1px solid rgba(255,255,255,0.2);">
+        <img src="/static/logo.png" style="width: 50px; height: 50px; border-radius: 12px; margin-bottom: 10px;">
+        <p style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Install Mazeo AI</p>
+        <p style="font-size: 12px; opacity: 0.8; margin-bottom: 15px;">Add to your home screen for the full app
+            experience.</p>
+        <button onclick="installPWA()"
+            style="background: white; color: black; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%;">Install
+            Now</button>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
